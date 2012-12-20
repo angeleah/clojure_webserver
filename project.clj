@@ -5,4 +5,5 @@
   :dev-dependencies [[speclj "2.1.1"]]
   :test-path "spec/"
   :main webserver.core
+  :java-source-path "src/"
 )
