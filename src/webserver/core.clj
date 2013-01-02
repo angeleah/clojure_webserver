@@ -40,6 +40,7 @@
 	 	 "Content-Type: text/html\n"
 		 "\n"
 	 	 "variable_1 = 123459876 variable_2 = some_value\n")) ; this will be removed and replaced with the reading of the file contents into the ok response.
+	
 (defn image-jpeg []
 	(str "HTTP/1.1 200 OK\n"
 	 	 "Content-Type: image/jpeg\n"
@@ -102,10 +103,26 @@
 			;        // Find out if the file exists already  this can help determine 404 or 200, etc.
 			 ;       if( fleExample.exists() ) {
 
+(defn parse-directory [arglist]
+	 (let [command (re-find #"-d \S+" arglist)]
+ 		(first(rest (str/split command #" ")))))
+
+
 ;should this be that webserver calls make- webserver with the directory?
 (defn make-webserver [directory-path]
-	(fn [?] ))
+	(fn [?] webserver))
 
-(defn -main [& args]
+;(defn parse-args [;args or &args?]]
+;	)
+
+;(defn -main [& args]
+;	(println arglis))
+	
+	
+;	(parse-directory arglist))
+
+;(defn -main [& args]
+;	(create-server port webserver))
+	;(create-server port make-webserver and pass in directory ))
 	;need to parse the args to grab what comes after the -d.  do I do this here or inside my webserver? I still do not get how I can get to the args.
-(create-server port webserver))
+	
