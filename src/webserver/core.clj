@@ -1,7 +1,7 @@
 (ns webserver.core
 	(:gen-class :main true)
 	(:use server.socket	
-		[clojure.string :as str :only [split]]))
+		[clojure.string :as str :only[split join]]))
 	(import '(java.io PrintWriter BufferedReader InputStreamReader File FileReader)) 
 
 (def port 5000)
@@ -79,7 +79,7 @@
 (defn read-document [request-uri]) ;if I read the document to get the contents, I need to also determine length.  If I do that 2x it is not dry.
 	;if I do it once it violates SRP.  ?? dilema.
 
-(defn webserver [in out]
+(defn webserver [in out directory]
 	(binding
 	      [ *in* (BufferedReader. (InputStreamReader. in))
 	        *out* (PrintWriter. out)]
@@ -101,28 +101,28 @@
 			;Therefore, before opening a file, you may want to check first whether it exists. To assist you with this, the File class is equipped with the exists() method. Here is an example of calling it:
 
 			;        // Find out if the file exists already  this can help determine 404 or 200, etc.
-			 ;       if( fleExample.exists() ) {
+			;       if( fleExample.exists() ) {
 
-(defn parse-directory [arglist]
-	 (let [command (re-find #"-d \S+" arglist)]
- 		(first(rest (str/split command #" ")))))
+;(defn parse-directory [commands]
+;	(let [cmd-vec-to-str (str/join ", " commands)]
+;		(let [matches (re-find #"-d \S+" cmd-vec-to-str)]
+;			(first(rest (str/split matches #" "))))))
 
+(defn vector-to-string [command-vector]
+	(str/join " " command-vector))
 
-;should this be that webserver calls make- webserver with the directory?
-(defn make-webserver [directory-path]
-	(fn [?] webserver))
+(defn parse-directory [commands]
+	(let [matches (re-find #"-d \S+" (vector-to-string commands))]
+	  	(first(rest (str/split matches #" ")))))
 
-;(defn parse-args [;args or &args?]]
-;	)
+(defn make-webserver [function-to-create]
+	(fn [directory] ()))
 
-;(defn -main [& args]
-;	(println arglis))
-	
-	
-;	(parse-directory arglist))
+(defn function-creator [function to create]
+	(fn [username] (str function to create ", " username)))
 
-;(defn -main [& args]
+;(defn -main []
 ;	(create-server port webserver))
-	;(create-server port make-webserver and pass in directory ))
-	;need to parse the args to grab what comes after the -d.  do I do this here or inside my webserver? I still do not get how I can get to the args.
-	
+
+(defn -main [& args]
+	(create-server port (make-webserver (parse-directory args))))
