@@ -18,7 +18,7 @@
 	; 	(should= "file1 contents" (read-text "/Users/angeleah/Development/8th_light_apprenticeship/webserver/public" "/file1")))
 		
 	(it "should be able to read a binary file"
-		(should= 31203 (count(read-bytes "/Users/angeleah/Development/8th_light_apprenticeship/webserver/public" "/image.jpeg"))));the count will count the # of items in collection.
+		(should= 36485 (count(read-bytes "/Users/angeleah/Development/8th_light_apprenticeship/webserver/public" "/image.jpeg"))));the count will count the # of items in collection.
 
 	; (it "should be able to parse query strings"
 	; 	(should= "variable_1 = 123459876 variable_2 = some_value" (parse-query-string "/some-script-url?variable_1=123459876&variable_2=some_value")))

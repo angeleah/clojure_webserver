@@ -5,6 +5,7 @@
 ;TODO pull out request-segments and separate the in and out.
 ;TODO - to do all in binary, create the string headers and then convert it all to binary, combine it with the body. How do you deal with the CRLF?
 ;TODO - there's always a need to pay attention to exceptions (in particular, IOException and FileNotFoundException)
+;TODO - Header must contain host to be valid 1.1
 ;-------
 ;TEST IDEA - Check for the host in 1.1 or accepting an absolute url in 1.1.?
 ;---------
@@ -24,17 +25,26 @@
 	(slurp (str directory file)))
 	
 (defn read-bytes [directory file]
-	(with-open[stream (java.io.FileInputStream. (str directory file))]
-	(byte-array
-		(loop [c (.read stream)]
+	(with-open[stream (clojure.java.io/reader (str directory file))]
+		(loop [c (.read stream) bytes []]
            (if (not= c -1)
-					(recur (.read stream)))))))
+				(recur (.read stream) (conj bytes c))
+				bytes))))
+				
+; (defn write-binary [data]
+; 	(with-open[writer(java.io.ByteArrayOutputStream.)]
+; 		(.toByteArray )))
 
-; 	(clojure.java.io/copy ((str directory file ))))	
-; .toByteArra	java.io.ByteArrayOutputStream
+; (defn read-bytes [directory file]
+; 	(with-open[stream (java.io.FileInputStream. (str directory file))]
+; 	(byte-array
+; 		(loop [c (.read stream)]
+;            (if (not= c -1)
+; 
+; 			(recur (.read stream)))))))
 
 (defn ok [directory file]
-	(str "HTTP/1.1 200 OK\n" 
+	(str "HTTP/1.1 200 OK\n"
 	 	 "Content-Type: text/html\n"
 		 "\n"
 	 	 (read-characters directory file)))
@@ -71,6 +81,12 @@
 		 "\n"
 	 	 ))
 
+(defn image-jpeg []
+	(str "HTTP/1.1 200 OK\n"
+	 	 "Content-Type: image/jpeg\n"
+		 "\n"
+	 	 ))
+	
 (defn not-found []
 	(str "HTTP/1.1 404 Not found\n"
     	 "Content-Type: text/html\n"
@@ -97,7 +113,7 @@
 (fn [in out]
 	(binding
 	      [ *in* (BufferedReader. (InputStreamReader. in))
-	        *out* (PrintWriter. out)]
+	        *out* (ByteArrayOutputStream. out)]
 	(let [request-segments
 	  (loop
 	    [pairs (zipmap [:method :request-uri :protocol-version] (str/split (read-line) #"\s")) line (read-line)]
@@ -111,7 +127,7 @@
 			  (and (= (:request-uri request-segments) "/redirect") (= (:method request-segments) "GET")) (println(redirect))
 			  (and (= (:request-uri request-segments) "/file1") (= (:method request-segments) "GET")) (println(parse-file directory (:request-uri request-segments)))
 			  (and (= (:request-uri request-segments) "/some-script-url?variable_1=123459876&variable_2=some_value") (= (:method request-segments) "GET")) (println(echo-back))
-			 ; (and (= (:request-uri request-segments) "/image.jpeg") (= (:method request-segments) "GET")) (println(image-jpeg directory (:request-uri request-segments)))
+			  (and (= (:request-uri request-segments) "/image.jpeg") (= (:method request-segments) "GET")) ((println(image-jpeg directory))(read-bytes directory (:request-uri request-segments)))
 			 ; (and (= (:request-uri request-segments) "/image.png") (= (:method request-segments) "GET")) (println(image-png))
 			 ; (and (= (:request-uri request-segments) "/image.gif") (= (:method request-segments) "GET")) (println(image-gif))
 			  :else (println(not-found)))))))
